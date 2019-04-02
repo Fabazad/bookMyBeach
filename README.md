@@ -1,5 +1,6 @@
 # bookMyBeach
 TMTC
+Work only on the book day.
 
 required : NodeJS & npm
 
