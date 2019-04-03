@@ -16,65 +16,91 @@ const timeAfterBooking= 1000*60*5; //5min after
 
 let targetDate = new Date();
 targetDate.setUTCHours(hourBook - 2); // -2 because UTC
-targetDate.setUTCMinutes(0);
+targetDate.setUTCMinutes(53);
 const targetTime = targetDate.getTime();
 var now = new Date();
 
-const app = express()
+main();
 
-app.listen(3000, function () {
-    console.log('Running');
-    if(targetTime - now.getTime() - timeBeforeBooking >= 0){
-        setTimeout(login, targetTime - now.getTime() - timeBeforeBooking);
+async function main(){
+    console.log("Running...  Polytech c'est super gay! Pissenliste, la vraie <3");
+    if(targetTime < now.getTime()){
+        console.error("Too late!");
+        return;
     }
-    else if(targetTime - now.getTime() > 0){
-        login();
+    if(targetTime - timeBeforeBooking > now.getTime()){
+        console.log("Waiting for " + (targetDate.getUTCHours()+1) + ":55...");
+        await wait(targetTime - now.getTime() - timeBeforeBooking);
     }
-})
-
-if(targetTime - now.getTime() - timeBeforeBooking >= 0){
-    setTimeout(login, targetTime - now.getTime() - timeBeforeBooking);
+    console.log("Logging...");
+    const cookies = await login();
+    if(!cookies){
+        console.error("Wrong Credentials!");
+        return;
+    }
+    console.log("Logged!")
+    var booked = false;
+    console.log("Booking...");
+    while(nowTime < targetTime + timeAfterBooking && !booked){
+        booked = await book(cookies);
+    }
+    if(booked){
+        console.log("Booked! Polytech c'est super gay! Pissenliste, la vraie <3");
+    }
+    else{
+        console.log("I worked for nothing!");
+    }
 }
 
-function login(){
-    now = new Date();
-    nowTime = now.getTime();
 
-    if(targetTime - timeBeforeBooking < nowTime && nowTime < targetTime + timeAfterBooking ){
+function login(){
+    return new Promise(resolve => {
+        now = new Date();
+        nowTime = now.getTime();
+
         request.post(loginUrl,{}, (error, res, body) => {
         if (error) {
             console.error(error)
-            return
+            return resolve();
         }
         if(body){
-            console.error("Wrong Credentials!");
-            return;
+            return resolve();
         }
-        book(res.headers['set-cookie'].join(';'));
+        return resolve(res.headers['set-cookie'].join(';'));
         
         }).form({
             email: email, 
             password: password
-        })
-    }
+        });
+    })
 }
   
 function book(cookies){
-    request.get(eventUrl,{
-        headers: {
-            'cookie': cookies
-        }
-    }, (error, res, body) => {
-    if (error) {
-        console.error(error)
-        return
-    }
-    console.log(body)
+    return new Promise(resolve => {
+        request.get(eventUrl,{
+            headers: {
+                'cookie': cookies
+            }
+        }, (error, res, body) => {
+            if (error) {
+                console.error(error)
+                return
+            }
+            if(body){ 
+                resolve(false);
+            }
+            resolve(true);
+        });
+        now = new Date();
+        nowTime = now.getTime();
     });
-    now = new Date();
-    nowTime = now.getTime();
-    if(targetTime + timeAfterBooking > nowTime){
-        setTimeout(() => book(cookies), 200);
-    }
 }
+
+function wait(x) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, x);
+    });
+  }
   
