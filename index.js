@@ -1,6 +1,5 @@
 const dotenv = require('dotenv');
 const request = require('request');
-const express = require('express')
 dotenv.config();
 
 const email = process.env.EMAIL;
@@ -16,7 +15,6 @@ const timeAfterBooking= 1000*60*5; //5min after
 
 let targetDate = new Date();
 targetDate.setUTCHours(hourBook - 2); // -2 because UTC
-targetDate.setUTCMinutes(53);
 const targetTime = targetDate.getTime();
 var now = new Date();
 
@@ -29,7 +27,7 @@ async function main(){
         return;
     }
     if(targetTime - timeBeforeBooking > now.getTime()){
-        console.log("Waiting for " + (targetDate.getUTCHours()+1) + ":55...");
+        console.log("Waiting for " + (hourBook-1) + ":55...");
         await wait(targetTime - now.getTime() - timeBeforeBooking);
     }
     console.log("Logging...");
