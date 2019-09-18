@@ -22,6 +22,12 @@ main();
 
 async function main(){
     console.log("Running...  Polytech c'est super gay! Pissenliste, la vraie <3");
+    let cookies = await login();
+    if(!cookies){
+        console.error("Wrong Credentials!");
+        return;
+    }
+    console.log("Good credentials.");
     if(targetTime < now.getTime()){
         console.error("Too late!");
         return;
@@ -31,7 +37,7 @@ async function main(){
         await wait(targetTime - now.getTime() - timeBeforeBooking);
     }
     console.log("Logging...");
-    const cookies = await login();
+    cookies = await login();
     if(!cookies){
         console.error("Wrong Credentials!");
         return;
